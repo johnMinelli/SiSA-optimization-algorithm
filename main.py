@@ -301,7 +301,7 @@ class SISA_Optimizer:
 
 
 if __name__ == '__main__':
-    N_INSTANCE = "001"
+    N_INSTANCE = "005"
 
     with open(f"in/I{N_INSTANCE}.in", "r") as f:
         number_covers = int(f.readline())

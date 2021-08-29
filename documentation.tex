@@ -1,0 +1,178 @@
+﻿\documentclass[a4paper]{article}
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\title{SISA algorithm for Cover printing problem}
+\author{Minelli Giovanni}
+
+\begin{document}
+
+
+\maketitle
+\section{Introduction}
+The use of approaches which combines linear programming algorithms with metaheuristics is not new for problems which allow a huge space of solutions. In particular there are many examples in the literature of applications of the simplex algorithm with higher-level optimizations to obtain good result even exploring only partially the search space \cite{sisa-train-formation}\cite{si-applications}\cite{salp}.\\
+The subject of this project has been the evaluation of Simulated annehaling metaheuristic combined with the Two phase variant of the simplex algorithm. The first was intended to be used for the exploration of the search space and exploitation of possible solutions while the second given of those trial point by the SA algorithm was able to calculate the relative cost using them as solutions to the main problem. In particular the problem chosen for the evaluation is a normal variant of the Cover printing problem.
+
+\subsection{Description of the problem}
+The cover printing problem is an NP-hard problem \cite{np-hard} arising in a printing shop [1—15].
+
+Let $M$ = {1,..., m} be a set of different book covers (or advertisements, labels, tracts, etc.) of equal size, and suppose that d\_i copies are to be printed of cover $i$, for $i \in M$. Suppose that for each print an unlimited number of identical plates can be made, and that an impression grid also called master or template can accommodate a specified number of $t$ plates. The printing process is:
+\begin{enumerate}
+\item Compose an impression grid of $t$ plates (some of them can be identical), and make a certain number of imprints with it. Each imprint produces one large printed sheet of paper which, once properly cut into t parts, yields t copies.
+\item Repeat step 1 until all the required copies are made.
+\end{enumerate}
+The printing cost comes from two sources: a per impression cost $C\_1$, and a fixed cost $C\_2$ for composing one impression grid (or grid, for short). Thus, the problem consists in determining the number of grids, the composition of each grid (which plates?), and the number of imprints made with each grid, so as to fulfill the copies' requirement at minimum total cost.
+\subsection{Matematical formulation}
+Recall M = {1,..., m} and let N  = {1,..., n}. Namely,
+
+\begin{figure}[H]
+\begin{center}
+    \includegraphics[keepaspectratio=true,scale=0.6]{n_combinations.png}
+\end{center}
+\end{figure}
+
+is the total number of distinct grids. Consider the integer, no-negative m-by-n matrix {$a_{i,j}$} whose columns are all pairwise distinct, each column corresponding to a possible impression grid.
+
+For $(i, j)  M × N$ the number of plates of cover $i$ in grid $j$ is represented by $a_{i,j}$ . Obviously
+\begin{figure}[h!]
+\begin{center}
+    \includegraphics[keepaspectratio=true,scale=0.6]{summation.png}
+\end{center}
+\end{figure}
+
+Thus the cover printing problem — also referred to as advertisement printing or label printing problem or job splitting problem — can be formulated as one of integer nonlinear optimization:
+
+\begin{figure}[h!]
+\begin{center}
+    \includegraphics[keepaspectratio=true,scale=0.6]{problem.png}
+\end{center}
+\end{figure}
+
+\section{Simulated annehaling}
+The main focus points of the SA algorithm are:
+\begin{itemize}
+\item \textbf{the terminating condition}: when to terminate the execution.
+\item \textbf{the annealing condition}: when to decrease the temperature.
+\item \textbf{cooling schedule}: how much is the temperature to be decreased.
+\item \textbf{the search process}: how explore the the space of possible solutions.
+\end{itemize}
+
+Mainly the structure of the algorithm and the parameters have been taken by literature \cite{sa-structure} \cite{sa-params} and then adapted to the problem. Later on tuned and refined with tests on the fly. The final structure is:
+            
+\begin{algorithm}[H]
+\caption{SISA}\label{euclid}
+\begin{algorithmic}[1]
+    \Procedure{sisa\_optimizer}{}
+        \State $temp \gets MAX\_TEMP$
+        \State $initial\_cover \gets $ create\_sol($dimension$) 
+        \State $S\_best, S\_iter \gets (initial\_cover$, Simplex($initial\_cover$))
+        \While{$temp > MIN\_TEMP$}
+            \State $initial\_cover \gets $ create\_sol(len($S\_iter.cover_solution$))
+            \State $S\_iter \gets (initial\_cover$, Simplex($initial\_cover$)
+            \State $stat\_iter \gets$ value\_cost($S\_best$)
+            \For{range($N\_ITER$)}
+                \State $S \gets $\Comment{use $S\_iter$ as starting point to calculate a new solution at each cycle exploring the neighbourhood and calcuate the simplex over that}
+                \If{value\_cost($S\_iter$) $>$ $S$}
+                    \State $S\_iter \gets S$
+                    \If{value\_cost($S\_best$) $>$ $S$}
+                        \State $S\_best \gets S$
+                    \EndIf
+                \Else
+                    \State $S\_iter \gets $ resize($S\_iter$)
+                \EndIf
+            \EndFor
+            \State $temp \gets$ update\_temp($stat\_iter$-value\_cost($S\_best$), $temp$)
+        \EndWhile
+    \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+The temperature is a parameter in simulated annealing that usually affects two aspects of the algorithm:
+the distance of a possible solution point from the next and the probability during a cycle of search, of accepting a solution even if not optimal. The temperature is fixed at a value dependant by the initial solution and the minimum bound is 100 times smaller of it.\\
+The search proceed with a cycle of \texttt{n} iterations at the end of which the temperature is updated dependently by the value itself and the improvement in the solution found during the \texttt{n} iterations. This value of improvement acquire a bigger weight with the decrement of the temperature and the more is high the more it has influence on the decrease of the temperature itself.\\
+Inside the iterations the standard SA behaviour has been coded. A new solution is picked at each iteration exploring a small neighbourhood around the solution of the previous iteration. After it's evaluation, it's acceptance can be decided by it's optimality or by a random factor influenced by the value of the temperature of the algorithm. In the negative case a procedure to exploit a solution outside of the current search area decide to enlarge or not the search space, adding a column to the matrix solution of the iteration.
+\subsubsection{Neighbourhood}
+The function to explore the neighbourhood is strictly dependant to the optimality of the solution: if the matrix is large, and some columns are not used (the zeros in the simplex solution indicate that such corresponding column is not used) and the solution is very good respect to the optimal one there is a good probability of resize the solution removing a single column. Indipendently from that the neighbourhood of the current solution is successively explored perturbing the values inside the matrix, of course still maintaining the properties of feasibility.
+\subsubsection{Resize}
+This case was a bit more articulate since the objective isn't a default requirement of the algorithm. The need I wanted to satisfy was to compensate the negative resize of the neighbourhood exploration end eventually escape a dip in the search space where no improvement can be made but still leave options to descend in a new optimum. To decide in which cases such action is necessary or not, have been considered the following parameters: the temperature, the value of the solution discarded in comparison to the best one of the current cycle of iterations, and the number of columns in the matrix solution as parameters. The following intuitions guided the choice of implementation:
+
+\begin{itemize}
+\item With high temperature give much more importance to the value of distance from optimum, but keep the probability down even if there is a bad (high difference) value of optimality: high value $\gets$ mid P
+\item With low temperature, since you are supposed to enlarge the search space gradually the probability increase: high value $\gets$ high P
+\item Since the probability of remove columns (in the neighbourhood function) is just influenced by the optimality and not by the temperature, the action probability in resize method can increase with the lowering of the temperature even if the optimality value is good with the certainty that the matrix will decrease anyway if the search process is in a good position. This allow to search in a bigger space even not escaping from a valley.
+
+\end{itemize}
+The possible combinations of situations can be described with the following distributions of probability (high P = it's very probable that will be applied a resize procedure to the solution matrix)\\
+
+\hfill\begin{minipage}{\dimexpr\textwidth-2cm}
+high temp, low cost, few cols = 0.3\quad\quad\quad\% low-mid\\
+high temp, low cost, many cols = 0.1\quad\quad\quad\% low-low\\
+high temp, high cost, few cols = 0.5\quad\quad\quad\% mid\\
+high temp, high cost, many cols = 0.01\quad\quad\quad\\
+low temp, low cost, few cols = 0.5\quad\quad\quad\% low-high\\
+low temp, low cost, many cols = 0.2\quad\quad\quad\% low-mid\\
+low temp, high cost, few cols = 0.9\quad\quad\quad\% high\\
+low temp, high cost, many cols = 0.05\quad\quad\quad\\
+\end{minipage}
+
+\section{Simplex}
+For the simplex part were analyzed different techniques and flavour of implementation to finally choice a Two phase variant of the algorithm. In particular from code tests and public documentation has been observed that the Revised version is more efficient than simple Simplex and that the Two-phase method compared with the Big-M method doesn't have significant differences in terms of performance. In practice, however, most computer codes utilizes the two-phased method. The reasons are that the inclusion of the big number M may cause round-off error and other computational difficulties.\\
+To be noted that some rounding problem were encountered even in my implementation and therefore a rounding with a precision of $1x10^-12$ have been applied at each tableau formation step.\\
+
+\noindent
+Some details of implementation about the simplex:
+\begin{itemize}
+\item If the problem is unfeasible it will be recognized at the end of phase1
+\item Phase2 is needed to verify the optimality or recognize an unbounded situation
+\end{itemize}
+The procedure works as follow:
+\begin{itemize}
+\item A BFS of the simplex is a basic feasible solution of the linear program (\textit{e.g.} maximize $c^T$x subject to Ax=b, x$\geq$0)
+\item A feasible solution is $x \in R^n$ for which there exists an m-element set $S \subseteq \aleph$ such that
+\begin{enumerate}
+\item The (square) matrix A is nonsingular, \textit{i.e.}, the columns indexed by B are linearly independent.
+\item $x_j$=0 for all $j \notin S$.
+\end{enumerate}
+\item If such a S is fixed, we call the variables $x_j$ with j ∈ S the basic variables, while the remaining variables are called nonbasic.
+\item If during phase1, in maximization, Z (the objective) value become strictly negative ($<0$) the problem is infeasible (minimization/positive)
+\item If at end of phase1, artificial variables are basic the solution is degenerate but valid
+\item Degeneracy happens when the equations in a tableau do not permit any increment of the selected nonbasic variable,
+and it may actually be impossible to increase the objective function value Z in a single pivot step.
+\end{itemize}
+\noindent
+Particular attention has been dedicated also to the possible problems derived by the resolution process of the LP algorithm:  unfeasible cases or degenerancy during the solution search. These cases are well captured in the code and handled, moreover cases in which the simplex steps doesn't take to an improvement can be easily seen in the plot representing the objective value collected at each step during the execution.
+
+\section{Visual representation}
+For the representation of the solutions each best solution found has been stored with the value of the temperature at the moment of discovery. All the solutions are then showed in a 3 dimensional plot where the different sizes of the solutions are put in relation with the corresponding value of optimality, and the moment of discovery determined by the temperature. Since the temperature has been used also as indicator of progression in the optimization process, has been represented both spatially and more intuitively with the aid of the colormap.\\
+As mentioned before, there exist also a function to represent graphically the simplex resolution process, to evaluate the behaviour and spot eventual cases of degenerancy.
+
+\section{Results}
+The tests and evaluation has been forwarded on \cite{cp-dataset} dataset, obtaining good results of optimality with the current setting of parameters.
+
+\newpage
+\begin{thebibliography}{}
+\bibitem{np-hard} A. Ekici, O. Ergun, P. Keskinocak, and M.G. Lagoudakis, Optimal Job Splitting on a Multi-Slot Machine with Applications in the Printing Industry, Naval Research Logistics 57 (2010) 237--251.
+\bibitem{sisa-train-formation} \texttt{https://onlinelibrary.wiley.com/doi/epdf/10.1002/atr.1183}
+\bibitem{sa-params} \texttt{https://www.researchgate.net/publication/250772567}
+\bibitem{sa-structure} \texttt{https://www.researchgate.net/publication/2619136}
+\bibitem{si-applications} \texttt{https://web.mit.edu/15.053/www/AMP-Chapter-13.pdf}
+\bibitem{salp} \texttt{https://www.hindawi.com/journals/mpe/2018/6193649/}
+\bibitem{sisa-approach} \texttt{https://paginas.fe.up.pt/$\sim$sfeyo/Docs\_SFA\_Publica\_Conferences/\\
+SFA\_JP\_19960101\_CCE\_The\%20Simplex-Simulated\%20Annealing.pdf}
+\bibitem{cp-dataset} Cover printing instances dataset\\ \texttt{https://www.matcuer.unam.mx/$\sim$davidr/cpp.html}
+\bibitem{simplex-calculator} Simplex calculator\\
+\texttt{http://simplex.tode.cz/en/#steps}
+\bibitem{big-m-res} Simplex - Big M method\\ \texttt{https://www.dam.brown.edu/people/huiwang/classes/am121/Archive/big\_M\_121\_c.pdf}
+\bibitem{si-res} \texttt{http://www.maths.qmul.ac.uk/$\sim$ffischer/teaching/opt/notes/notes8.pdf}
+\bibitem{si-step-by-setp-res} \texttt{https://www3.nd.edu/$\sim$dgalvin1/30210/30210\_F07/presentations/simplex\_full.pdf}
+\end{thebibliography}
+\end{document}

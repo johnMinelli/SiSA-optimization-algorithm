@@ -11,25 +11,16 @@
 % Document
 \begin{document}
 
-
-\textbf{TODO}
+\section{simulated annehaling}
 \begin{itemize}
-\item Clean doc with steps and a bit of introduction mostly for git
-\item Upgrade the plot to be interactive on temperature
+    \item https://www.researchgate.net/publication/250772567
+    \item https://www.researchgate.net/publication/2619136_A_Simulated_Annealing_code_for_General_Integer_Linear_Programs
+    \item https://paginas.fe.up.pt/~sfeyo/Docs_SFA_Publica_Conferences/SFA_JP_19960101_CCE_The%20Simplex-Simulated%20Annealing.pdf
+    \item https://onlinelibrary.wiley.com/doi/epdf/10.1002/atr.1183
+    \item https://www.hindawi.com/journals/mpe/2018/6193649/
 \end{itemize}
-    
-applications of SISA (train formation) https://onlinelibrary.wiley.com/doi/epdf/10.1002/atr.1183
-    
-    
-Temperature
-The temperature is a parameter in simulated annealing that affects two aspects of the algorithm:
 
-The distance of a trial point from the current point (See Outline of the Algorithm, Step 1.)
-
-The probability of accepting a trial point with higher objective function value (See Outline of the Algorithm, Step 2.)
-
-Temperature can be a vector with different values for each component of the current point. Typically, the initial temperature is a scalar.
-    \start{itemize}
+\begin{itemize}
     \item place the number in matrix
     \item calculate the simplex and get set it at best -> = S_best, S_iter
     \item then proceed for N iterations using width of S_iter calculate a new solution for the first round -> S_iter
@@ -40,7 +31,8 @@ Temperature can be a vector with different values for each component of the curr
         if is better then S_best you are ok
             substitute the current S_best with S
     else resize the solution in a way to backtrack a little
-    \end{itemize}
+\end{itemize}
+
     from my perspective at first you are guided by luck then by results
     start = high temperature
         explore
@@ -73,11 +65,8 @@ Temperature can be a vector with different values for each component of the curr
 
     alta temperatura, highdiff optimal = 0.1             | non togliere le colonne altrimenti poi si aggiungono ma piuttosto swappa il neighb
     alta temperatura, lowdiff optimal = 0.8              | togli le colonne you are in a good spot
-
-
-
-\end{document}
-
+    
+    
 
 high t, low cost, low cols = 0.3  
 high t, low cost, high cols = 0.1  
@@ -87,23 +76,17 @@ low t, low cost, low cols = 0.5
 low t, low cost, high cols = 0.2 
 low t, high cost, low cols = 0.9  
 low t, high cost, high cols = 0.05 
---------------------------------
--revised is more efficient than simple simplex
--two-phase method and big-M method are equivalent. In practice, however, most computer
-codes utilizes the two-phased method. The reasons are that the inclusion of the big number M
-may cause round-off error and other computational difficulties
 
---------------------------------
-- Se il problema è inammissibile lo scopro in Fase 1
-- Dopodichè uso Fase 2 fino a verificare un test di ottimalità o di
-illimitatezza (prima o poi converge: se mi accorgo di ciclare
-proseguo introducendo una regola anticiclaggio)
--A basic feasible solution of the linear program
-    maximize cᵀx subject to Ax=b, x≥0
-is a feasible solution x∈ Rⁿ for which there exists an m-element set S *⊆ {1, 2, . . . , n} such that
-1. The (square) matrix Aₛ is nonsingular, i.e., the columns indexed by B are linearly independent.
-2. xⱼ=0 for all J ∉ S.
-If such a S is fixed, we call the variables xⱼ with* j ∈ S* the basic variables, while the remaining variables are called nonbasic.
+
+\section{simplex}
+\begin{itemize}
+    \item https://geekrodion.com/blog/operations/simplex
+    \item https://www.dam.brown.edu/people/huiwang/classes/am121/Archive/big_M_121_c.pdf
+    \item https://cbom.atozmath.com/CBOM/Simplex.aspx?q=tp&q1=2%603%60MAX%60Z%60x1%2cx2%601%2c1%600%2c1%3b0%2c2%3b4%2c1%60%3e%3d%2c%3e%3d%2c%3e%3d%604500%2c9000%2c16000%60%60D%60false%60false%60false%60true%60false%60false%60false&do=1#tblSolution
+    \item http://simplex.tode.cz/en/#steps
+    \item http://www.maths.qmul.ac.uk/~ffischer/teaching/opt/notes/notes8.pdf
+    \item https://www3.nd.edu/~dgalvin1/30210/30210_F07/presentations/simplex_full.pdf
+\end{itemize}
 
 Degeneracy happens when the equations in a tableau do not permit any increment of the selected nonbasic variable,
 and it may actually be impossible to increase the objective function z in a single pivot step.
@@ -159,12 +142,4 @@ now proceed the phase 2 removing all negative with iterations
 if during phase 1,in maximization Z value become negative (<0) the problem is infeasible (minimization/positive)
 if at end of phase 1, artificial variables are basic the solution is degenerate (whatch wikipedia or geekrodion)
 
-
-
-inizi con min
-usi a1+a2+z=0
-togli il più negativo
-
-inizi con min
-usi -a1-a2+z=0
-togli il più positivo
+\end{document}

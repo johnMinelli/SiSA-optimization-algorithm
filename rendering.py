@@ -3,15 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import axes3d    
-# https://github.com/Malkovsky/interactive-visualization/blob/master/examples/overview.ipynb
+from mpl_toolkits.mplot3d import axes3d
 
 def render_search_results(optimal_solutions):
 
     sols = np.array(optimal_solutions)
-    t = -1
+    t = sols[0][2]+1
     for sol in sols:
-        if sol[2] == t: sol[2] += 10000
+        if sol[2] >= t: sol[2] = t-10000
         t = sol[2]
 
     sizes = sols[:, 0]
