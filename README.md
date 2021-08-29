@@ -4,4 +4,5 @@ Simplex algorithm integrated with simulated annehaling serch metaheuristc applie
 [Documentation with approch explained](Project-report.pdf)
 
 Example of rendered result:
+
 ![render example](render-example.png)
