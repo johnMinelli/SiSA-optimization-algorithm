@@ -77,7 +77,7 @@ class SISA_Optimizer:
         if debug: print("--"*40, "\nTO REFINE:\n", S_best[0], "\nCOST:", S_best[1],)
         refined_solution, cost = self.refine(S_best, debug)
         optimal_solutions.append((len(refined_solution[1]), cost, 0))
-        
+
         if debug: print("OPT:\n", refined_solution, "\nCOST:", cost)
         if self.unfeasible != 0: print(f"Found {self.unfeasible}  unfeasible linear problem/s")
         if render: render_search_results(optimal_solutions)
@@ -85,7 +85,6 @@ class SISA_Optimizer:
 
     def evaluate_cost(self, solution):
         covers_printed, grids_printed = solution
-        # amount_covers_printed = np.sum(grids_printed * covers_printed, axis=1)
         cost_c1 = np.sum(grids_printed) * self.cost_covers if not(math.inf in grids_printed) else math.inf
         cost_c2 = self.cost_grid * np.count_nonzero(grids_printed) if not(math.inf in grids_printed) else math.inf
         tot = cost_c1+cost_c2
@@ -319,21 +318,5 @@ if __name__ == '__main__':
         cost = float(lines[-1])
 
     print("Solved in {} s, at {}%".format(round(stop-start, 2), round(100-((sisa_cost-cost)*100/cost), 2)))
-
-    # Toy example
-    # m = 5 # n of covers
-    # t = 16 # grid size (4 by 4)
-    # demand = [12, 18, 44, 47]
-    # prints = np.array([[1, 2, 3, 0],
-    #                    [1, 2, 2, 7],
-    #                    [6, 4, 0, 0],
-    #                    [0, 0, 3, 1]])
-    # printed = np.array([[1, 2, 3, 0],
-    #                    [0, 0, 0, 0],
-    #                    [0, 0, 0, 0],
-    #                    [0, 0, 0, 0]])
-    # print(demand * printed)
-    # k = 3 # solution n of grids
-
 
 
