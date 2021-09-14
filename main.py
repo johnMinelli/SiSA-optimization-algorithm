@@ -71,7 +71,7 @@ class SISA_Optimizer:
                         optimal_solutions.append((len(S_best[1]), cost_best, temperature))
                 else: S_iter = self.resize(S_iter, cost_current, cost_iter, temperature)
                 n_iter += 1
-            temperature = self.update_temperature(temperature, (cost_improving+1-cost_best) / cost_best)
+            temperature = self.update_temperature(temperature, (cost_improving+1-cost_best) / cost_best+1)
             if debug: print("Random explorations:", randomness)
             if debug: print(f"\n ANNEALING --> {int(temperature)}°")
         if debug: print("--"*40, "\nTO REFINE:\n", S_best[0], "\nCOST:", S_best[1],)
@@ -164,7 +164,7 @@ class SISA_Optimizer:
     def resize(self, actual_solution, cost_current, cost_actual, temperature):
         '''
         :param actual_solution: the solution in the iteration cycle (covers displacement, n° print for grids)
-        :param cost_current: the cost of the discarded bad solution which caused the call 
+        :param cost_current: the cost of the discarded bad solution which caused the call
         :param cost_actual: the cost of the solution in the iteration cycle
         :param temperature: temperature of optimization process
         :return: a resized version of the actual solution (B, X(B)) --> (B', X(B'))
@@ -186,7 +186,7 @@ class SISA_Optimizer:
         cols_norm = k / self.number_covers
         cost_norm = (cost_current +1 - cost_actual) / cost_actual
         temp_norm = self.THERMO_DEPENDANCE * (temperature/self.INIT_TEMP)
-        if k < self.number_covers: 
+        if k < self.number_covers:
             if q == 0 or np.random.random() < np.exp(-(cols_norm/(cost_norm*2))-(temp_norm*2)):  # probability based
                 column = np.random.randint(0, self.grid_size, self.number_covers)
                 sum = np.sum(column)
@@ -283,7 +283,7 @@ class SISA_Optimizer:
         '''
         temp_ratio = temperature/self.INIT_TEMP
         cost_val = cost_reduction_norm*(1+abs(np.log(temp_ratio)))
-        return (self.COOLING_FACTOR-cost_val) * temperature
+        return (max(0.2, self.COOLING_FACTOR-cost_val)) * temperature
 
     def increment_zero_rows(self, covers_grids):
         while not np.all(np.sum(covers_grids, axis=1)):
